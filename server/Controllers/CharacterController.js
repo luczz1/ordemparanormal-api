@@ -6,8 +6,8 @@ import skillsMap from "../../models/skillsMap.js";
 
 import fs from "fs";
 import path from "path";
+import mediaPath from "../../server.js";
 
-const mediaPath = "C:/Users/weesl/OneDrive/Documentos/Media/";
 class CharacterController {
   async getCharacters(req, res) {
     try {
