@@ -9,9 +9,6 @@ const skillsMap = [
     AgentedeSaúde: ["Intuição", "Medicina"],
   },
   {
-    Amnésico: ["Duas à escolha do mestre"],
-  },
-  {
     Artista: ["Artes", "Enganação"],
   },
   {

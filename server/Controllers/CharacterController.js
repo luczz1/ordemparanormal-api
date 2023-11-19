@@ -108,6 +108,8 @@ class CharacterController {
         max_life = 8 + stamina;
         max_effort = 1 + presence;
         max_sanity = 8;
+
+        nex = 0;
       }
 
       current_life = max_life;
@@ -167,7 +169,7 @@ class CharacterController {
         "artes",
         "atletismo",
         "atualidades",
-        "ciência",
+        "ciências",
         "diplomacia",
         "enganação",
         "fortitude",
@@ -207,7 +209,7 @@ class CharacterController {
 
       await pool.execute(
         "INSERT INTO inventory_infos (prestige_points, patent, item_limit_1, item_limit_2, item_limit_3, item_limit_4, credit_limit, max_load, max_spc_load, character_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-        [0, "", null, null, null, null, "", 0, 0, newCharacterId]
+        [0, "", 2, null, null, null, "", 0, 0, newCharacterId]
       );
 
       await pool.execute(
@@ -274,7 +276,7 @@ class CharacterController {
         });
       }
 
-      if (charClass.toLowerCase() === "ocultista") {
+      if (lowerCharClass === "ocultista") {
         ["Ocultismo", "Vontade"].forEach(async (skill) => {
           await pool.execute(
             "UPDATE skills SET training = ?, value = ?, favorite = ? WHERE name = ? AND character_id = ?",
@@ -290,15 +292,13 @@ class CharacterController {
         newCharacterId,
       ]);
 
-      if (nex >= 5) {
-        let abilitiesNex = abilitiesNexMap.find((obj) => obj[charClass]);
-        abilitiesNex = abilitiesNex[charClass];
+      let abilitiesNex = abilitiesNexMap.find((obj) => obj[charClass]);
+      abilitiesNex = abilitiesNex[charClass];
 
-        await pool.execute(
-          "INSERT INTO abilities (name, description, character_id, page) VALUES (?, ?, ?, ?)",
-          [abilitiesNex[0], abilitiesNex[1], newCharacterId, null]
-        );
-      }
+      await pool.execute(
+        "INSERT INTO abilities (name, description, character_id, page) VALUES (?, ?, ?, ?)",
+        [abilitiesNex[0], abilitiesNex[1], newCharacterId, null]
+      );
 
       res.json({
         character: {
@@ -419,6 +419,10 @@ class CharacterController {
           updatedCharacter.image_url,
           characterId
         );
+      }
+
+      if (updatedCharacter.charClass === "Mundano") {
+        updatedCharacter.nex = 0;
       }
 
       updatedCharacter.pe_round = updatedCharacter.nex / 5;
