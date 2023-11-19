@@ -74,10 +74,9 @@ class AbilitiesController {
     try {
       const ritualID = req.params.id;
 
-      const [result] = await pool.execute(
-        "SELECT * FROM powers WHERE id = ?",
-        [ritualID]
-      );
+      const [result] = await pool.execute("SELECT * FROM powers WHERE id = ?", [
+        ritualID,
+      ]);
 
       if (result.length === 0) {
         res.status(200).json("Ritual não encontrado");
@@ -116,7 +115,7 @@ class AbilitiesController {
       const power = req.body;
 
       await pool.execute(
-        "INSERT INTO powers (character_id, name, description, price, page, element, circle, target, duration, resistance, execution, reach) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO powers (character_id, name, description, price, page, element, circle, target, duration, resistance, execution, reach) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         [
           characterId,
           power.name,
@@ -144,24 +143,29 @@ class AbilitiesController {
     try {
       const abilityId = req.params.abilityId;
       const updatedAbility = req.body;
-  
+
       await pool.execute(
         "UPDATE abilities SET name=?, description=?, page=? WHERE id=?",
-        [updatedAbility.name, updatedAbility.description, updatedAbility.page, abilityId]
+        [
+          updatedAbility.name,
+          updatedAbility.description,
+          updatedAbility.page,
+          abilityId,
+        ]
       );
-  
+
       res.status(200).json({ message: "Habilidade atualizada com sucesso" });
     } catch (error) {
       console.error("Erro ao atualizar habilidade:", error);
       res.status(500).json("Erro ao atualizar habilidade");
     }
   }
-  
+
   async updateRitual(req, res) {
     try {
       const ritualId = req.params.ritualId;
       const updatedRitual = req.body;
-  
+
       await pool.execute(
         "UPDATE powers SET name=?, description=?, price=?, page=?, element=?, circle=?, target=?, duration=?, resistance=?, execution=?, reach=? WHERE id=?",
         [
@@ -179,14 +183,32 @@ class AbilitiesController {
           ritualId,
         ]
       );
-  
+
       res.status(200).json({ message: "Ritual atualizado com sucesso" });
     } catch (error) {
       console.error("Erro ao atualizar ritual:", error);
       res.status(500).json("Erro ao atualizar ritual");
     }
   }
-  
+
+  async updateRitualDT(req, res) {
+    try {
+      const character_id = req.params.characterid;
+      const newDT = req.params.dt;
+
+      console.log(req.params);
+
+      await pool.execute("UPDATE characters SET dt=? WHERE id=?", [
+        newDT,
+        character_id,
+      ]);
+
+      res.status(200).json({ message: "DT atualizada com sucesso" });
+    } catch (error) {
+      console.error("Erro ao atualizar DT:", error);
+      res.status(500).json("Erro ao atualizar DT");
+    }
+  }
 
   async deleteAbilities(req, res) {
     try {

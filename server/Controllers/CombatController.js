@@ -122,13 +122,10 @@ class CombatController {
       const defenseItem = req.body;
       const defenseId = req.params.id;
 
-      await pool.execute(
-        "UPDATE defense SET protection = ? WHERE id = ?",
-        [
-          defenseItem.protection_value,
-          defenseId,
-        ]
-      );
+      await pool.execute("UPDATE defense SET protection = ? WHERE id = ?", [
+        defenseItem.protection_value,
+        defenseId,
+      ]);
 
       res.json({
         message: "Atualizado com sucesso.",

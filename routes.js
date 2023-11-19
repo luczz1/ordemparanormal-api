@@ -67,6 +67,7 @@ routes.put("/abilities/:abilityId", ValidateToken, AbilitiesController.updateAbi
 routes.put("/rituals/:ritualId", ValidateToken, AbilitiesController.updateRitual);
 routes.delete("/characters/abilities/:id/:itemId", ValidateToken, AbilitiesController.deleteAbilities);
 routes.delete("/characters/powers/:id/:itemId", ValidateToken, AbilitiesController.deleteRituals);
+routes.put("/characters/dt/:characterid/:dt", ValidateToken, AbilitiesController.updateRitualDT);
 
 //sobre
 routes.get("/characters/about/:characterId", ValidateToken, AboutController.getCharacterAbout);

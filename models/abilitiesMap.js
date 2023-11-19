@@ -31,7 +31,7 @@ const abilitiesMap = [
     },
     {
       Chef: [
-        "IngredienteSecreto.",
+        "Ingrediente Secreto.",
         "Em cenas de interlúdio, você pode fazer a ação alimentar-se para cozinhar um prato especial. Você, e todos os membros do grupo que fizeram a ação alimentar-se, recebem o benefício de dois pratos (caso o mesmo benefício seja escolhido duas vezes, seus efeitos se acumulam).",
       ],
     },

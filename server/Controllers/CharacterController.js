@@ -7,7 +7,7 @@ import skillsMap from "../../models/skillsMap.js";
 import fs from "fs";
 import path from "path";
 
-const mediaPath = 'C:/Users/weesl/OneDrive/Documentos/Media/';
+const mediaPath = "C:/Users/weesl/OneDrive/Documentos/Media/";
 class CharacterController {
   async getCharacters(req, res) {
     try {
@@ -82,6 +82,7 @@ class CharacterController {
         player,
         displacement,
         origin,
+        pe_round,
         agility,
         strength,
         intellect,
@@ -104,17 +105,19 @@ class CharacterController {
         max_effort = 3 + presence;
         max_sanity = 16;
       } else {
-        max_life = 10;
-        max_effort = 10;
-        max_sanity = 10;
+        max_life = 8 + stamina;
+        max_effort = 1 + presence;
+        max_sanity = 8;
       }
 
       current_life = max_life;
       current_effort = max_effort;
       current_sanity = max_sanity;
 
+      pe_round = nex / 5;
+
       const [characterResult] = await pool.execute(
-        "INSERT INTO characters (name, current_life, max_life, current_sanity, max_sanity, current_effort, max_effort, class, image_url, nex, weight, age, occupation, `path`, player, displacement, hidden_life, hidden_sanity, hidden_effort, origin, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO characters (name, current_life, max_life, current_sanity, max_sanity, current_effort, max_effort, class, image_url, nex, weight, age, occupation, `path`, player, displacement, hidden_life, hidden_sanity, hidden_effort, origin, user_id, pe_round) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         [
           name,
           current_life,
@@ -124,7 +127,7 @@ class CharacterController {
           current_effort,
           max_effort,
           charClass,
-          '',
+          "",
           nex,
           weight,
           age,
@@ -137,18 +140,22 @@ class CharacterController {
           0,
           origin,
           userid,
+          pe_round,
         ]
       );
 
       const newCharacterId = characterResult.insertId;
 
       if (image_url) {
-        const imageUrlLink = await saveBase64ImageToDisk(image_url, newCharacterId);
-  
-        await pool.execute(
-          "UPDATE characters SET image_url = ? where id = ?",
-          [imageUrlLink, newCharacterId]
+        const imageUrlLink = await saveBase64ImageToDisk(
+          image_url,
+          newCharacterId
         );
+
+        await pool.execute("UPDATE characters SET image_url = ? where id = ?", [
+          imageUrlLink,
+          newCharacterId,
+        ]);
       }
 
       await pool.execute(
@@ -217,7 +224,7 @@ class CharacterController {
         ocultista: [1, 0, 0, 0, 0],
         combatente: [1, 1, 0, 1, 0],
         especialista: [1, 0, 0, 1, 0],
-        default: [0, 0, 0, 0, 0],
+        mundano: [1, 0, 0, 0, 0],
       };
 
       const proficiencyValues =
@@ -276,6 +283,13 @@ class CharacterController {
         });
       }
 
+      const dt = 10 + presence;
+
+      await pool.execute("UPDATE characters SET dt = ? WHERE id = ?", [
+        dt,
+        newCharacterId,
+      ]);
+
       if (nex >= 5) {
         let abilitiesNex = abilitiesNexMap.find((obj) => obj[charClass]);
         abilitiesNex = abilitiesNex[charClass];
@@ -303,7 +317,9 @@ class CharacterController {
       const characterId = req.params.id;
 
       const filesInMedia = fs.readdirSync(mediaPath);
-      const filesToDelete = filesInMedia.filter(file => file.startsWith(`${characterId}-`));
+      const filesToDelete = filesInMedia.filter((file) =>
+        file.startsWith(`${characterId}-`)
+      );
 
       filesToDelete.forEach((file) => {
         const filePath = path.join(mediaPath, file);
@@ -357,7 +373,7 @@ class CharacterController {
       const updatedCharacter = req.body;
 
       await pool.execute(
-        "UPDATE characters SET name = ?, current_life = ?, max_life = ?, current_sanity = ?, max_sanity = ?, current_effort = ?, max_effort = ? WHERE id = ?",
+        "UPDATE characters SET name = ?, current_life = ?, max_life = ?, current_sanity = ?, max_sanity = ?, current_effort = ?, max_effort = ?, pe_round = ? WHERE id = ?",
         [
           updatedCharacter.name,
           updatedCharacter.current_life,
@@ -366,6 +382,7 @@ class CharacterController {
           updatedCharacter.max_sanity,
           updatedCharacter.current_effort,
           updatedCharacter.max_effort,
+          updatedCharacter.pe_round,
           characterId,
         ]
       );
@@ -383,16 +400,13 @@ class CharacterController {
     try {
       const characterId = req.params.id;
       const updatedCharacter = req.body;
-      let imageUrlLink = '';
+      let imageUrlLink = updatedCharacter.image_url;
 
-      if (updatedCharacter.image_url) {
-        imageUrlLink = await saveBase64ImageToDisk(
-          updatedCharacter.image_url,
-          characterId
-        );
-      } else {
+      if (!imageUrlLink) {
         const filesInMedia = fs.readdirSync(mediaPath);
-        const filesToDelete = filesInMedia.filter(file => file.startsWith(`${characterId}-`));
+        const filesToDelete = filesInMedia.filter((file) =>
+          file.startsWith(`${characterId}-`)
+        );
 
         filesToDelete.forEach((file) => {
           const filePath = path.join(mediaPath, file);
@@ -400,8 +414,17 @@ class CharacterController {
         });
       }
 
+      if (imageUrlLink && imageUrlLink.startsWith("data:image")) {
+        imageUrlLink = await saveBase64ImageToDisk(
+          updatedCharacter.image_url,
+          characterId
+        );
+      }
+
+      updatedCharacter.pe_round = updatedCharacter.nex / 5;
+
       await pool.execute(
-        "UPDATE characters SET name = ?, current_life = ?, max_life = ?, current_sanity = ?, max_sanity = ?, current_effort = ?, max_effort = ?, class = ?, image_url = ?, nex = ?, weight = ?, age = ?, occupation = ?, `path` = ?, player = ?, displacement = ?, origin = ?, user_id = ? WHERE id = ?",
+        "UPDATE characters SET name = ?, current_life = ?, max_life = ?, current_sanity = ?, max_sanity = ?, current_effort = ?, max_effort = ?, class = ?, image_url = ?, nex = ?, weight = ?, age = ?, occupation = ?, `path` = ?, player = ?, displacement = ?, origin = ?, pe_round = ?, user_id = ? WHERE id = ?",
         [
           updatedCharacter.name,
           updatedCharacter.current_life,
@@ -420,6 +443,7 @@ class CharacterController {
           updatedCharacter.player,
           updatedCharacter.displacement,
           updatedCharacter.origin,
+          updatedCharacter.pe_round,
           userid,
           characterId,
         ]
@@ -512,7 +536,9 @@ async function saveBase64ImageToDisk(base64String, characterId) {
   try {
     const filesInMedia = fs.readdirSync(mediaPath);
 
-    const filesToDelete = filesInMedia.filter(file => file.startsWith(`${characterId}-`));
+    const filesToDelete = filesInMedia.filter((file) =>
+      file.startsWith(`${characterId}-`)
+    );
 
     const filename = `${characterId}-${Date.now()}`;
 
@@ -521,8 +547,8 @@ async function saveBase64ImageToDisk(base64String, characterId) {
       fs.unlinkSync(filePath);
     });
 
-    const image = base64String.replace(/^data:image\/\w+;base64,/, '');
-    const bitmap = Buffer.from(image, 'base64');
+    const image = base64String.replace(/^data:image\/\w+;base64,/, "");
+    const bitmap = Buffer.from(image, "base64");
     const newFilePath = path.join(mediaPath, `${filename}.jpg`);
 
     fs.writeFileSync(newFilePath, bitmap);
