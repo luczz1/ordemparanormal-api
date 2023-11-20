@@ -115,7 +115,7 @@ class AbilitiesController {
       const power = req.body;
 
       await pool.execute(
-        "INSERT INTO powers (character_id, name, description, price, page, element, circle, target, duration, resistance, execution, reach) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO powers (character_id, name, description, price, page, element, circle, target, duration, resistance, execution, reach) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         [
           characterId,
           power.name,
