@@ -117,6 +117,7 @@ class CharacterController {
       current_sanity = max_sanity;
 
       pe_round = nex / 5;
+      if (pe_round <= 0) pe_round = 1;
 
       const [characterResult] = await pool.execute(
         "INSERT INTO characters (name, current_life, max_life, current_sanity, max_sanity, current_effort, max_effort, class, image_url, nex, weight, age, occupation, `path`, player, displacement, hidden_life, hidden_sanity, hidden_effort, origin, user_id, pe_round) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
@@ -255,12 +256,13 @@ class CharacterController {
         };
 
         await pool.execute(
-          "INSERT INTO abilities (name, description, character_id, page) VALUES (?, ?, ?, ?)",
+          "INSERT INTO abilities (name, description, character_id, page, type) VALUES (?, ?, ?, ?, ?)",
           [
             abilitiesData.name,
             abilitiesData.desc,
             abilitiesData.id,
             abilitiesData.page,
+            'default'
           ]
         );
       }
@@ -296,8 +298,8 @@ class CharacterController {
       abilitiesNex = abilitiesNex[charClass];
 
       await pool.execute(
-        "INSERT INTO abilities (name, description, character_id, page) VALUES (?, ?, ?, ?)",
-        [abilitiesNex[0], abilitiesNex[1], newCharacterId, null]
+        "INSERT INTO abilities (name, description, character_id, page, type) VALUES (?, ?, ?, ?, ?)",
+        [abilitiesNex[0], abilitiesNex[1], newCharacterId, null, 'class']
       );
 
       res.json({
@@ -421,11 +423,57 @@ class CharacterController {
         );
       }
 
+      const [attrResult] = await pool.execute(
+        "SELECT * FROM attributes WHERE id = ?",
+        [characterId]
+      );
+
+      await pool.execute(
+        "DELETE FROM abilities WHERE character_id = ? AND type = ?",
+        [characterId, 'class']
+      );
+
+      let abilitiesNex = abilitiesNexMap.find((obj) => obj[updatedCharacter.charClass]);
+      abilitiesNex = abilitiesNex[updatedCharacter.charClass];
+
+      await pool.execute(
+        "INSERT INTO abilities (name, description, character_id, page, type) VALUES (?, ?, ?, ?, ?)",
+        [abilitiesNex[0], abilitiesNex[1], characterId, null, 'class']
+      );
+
       if (updatedCharacter.charClass === "Mundano") {
         updatedCharacter.nex = 0;
+
+        updatedCharacter.max_life = (8 + attrResult[0].stamina);
+        updatedCharacter.max_effort = (1 + attrResult[0].presence);
+        updatedCharacter.max_sanity = 8;
+      } else {
+        const levels = (updatedCharacter.nex / 5) - 1;
+
+        switch (updatedCharacter.charClass) {
+          case "Ocultista":
+            updatedCharacter.max_life = (12 + attrResult[0].stamina) + ((2 + attrResult[0].stamina) * levels);
+            updatedCharacter.max_effort = (4 + attrResult[0].presence) + ((4 + attrResult[0].presence) * levels);
+            updatedCharacter.max_sanity = 20 + 5 * levels;
+            break;
+          case "Especialista":
+            updatedCharacter.max_life = (16 + attrResult[0].stamina) + ((3 + attrResult[0].stamina) * levels);
+            updatedCharacter.max_effort = (3 + attrResult[0].presence) + ((3 + attrResult[0].presence) * levels);
+            updatedCharacter.max_sanity = 16 + 4 * levels;
+            break;
+          case "Combatente":
+            updatedCharacter.max_life = (20 + attrResult[0].stamina) + ((4 + + attrResult[0].stamina) * levels);
+            updatedCharacter.max_effort = (2 + attrResult[0].presence) + ((2 + attrResult[0].presence) * levels);
+            updatedCharacter.max_sanity = 12 + 3 * levels;
+            break;
+        }
       }
 
       updatedCharacter.pe_round = updatedCharacter.nex / 5;
+
+      updatedCharacter.current_life = updatedCharacter.max_life;
+      updatedCharacter.current_effort = updatedCharacter.max_effort;
+      updatedCharacter.current_sanity = updatedCharacter.max_sanity;
 
       await pool.execute(
         "UPDATE characters SET name = ?, current_life = ?, max_life = ?, current_sanity = ?, max_sanity = ?, current_effort = ?, max_effort = ?, class = ?, image_url = ?, nex = ?, weight = ?, age = ?, occupation = ?, `path` = ?, player = ?, displacement = ?, origin = ?, pe_round = ?, user_id = ? WHERE id = ?",

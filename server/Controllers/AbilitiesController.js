@@ -98,8 +98,8 @@ class AbilitiesController {
       const ability = req.body;
 
       await pool.execute(
-        "INSERT INTO abilities (character_id, name, description, page) VALUES (?, ?, ?, ?)",
-        [characterId, ability.name, ability.description, ability.page]
+        "INSERT INTO abilities (character_id, name, description, page, type) VALUES (?, ?, ?, ?, ?)",
+        [characterId, ability.name, ability.description, ability.page, 'default']
       );
 
       res.status(200).json({ message: "Habilidade criada com sucesso" });

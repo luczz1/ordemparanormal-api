@@ -63,6 +63,59 @@ class AttributesController {
           "UPDATE character_defense SET defense_total = ? WHERE character_id = ?",
           [10 + Number(attributeValue), characterId]
         );
+      } else if (attribute === "stamina") {
+        const [characterResult] = await pool.execute(
+          "SELECT * FROM characters WHERE id = ?",
+          [characterId]
+        );
+
+        const classValues = {
+          Ocultista: 12,
+          Especialista: 16,
+          Combatente: 20,
+        };
+
+        const upValues = {
+          Ocultista: 2,
+          Especialista: 3,
+          Combatente: 4,
+        };
+
+        const defaultVal = classValues[characterResult[0].class] || 8;
+        const upVal = upValues[characterResult[0].class] || 1;
+
+        let levels = characterResult[0].nex / 5 - 1;
+        if (levels < 0) {levels = 0;}
+
+        const life = defaultVal + Number(attributeValue) + ((upVal + Number(attributeValue)) * levels);
+
+        await pool.execute(
+          "UPDATE characters SET max_life = ?, current_life = ? WHERE id = ?",
+          [life, life, characterId]
+        );
+      } else if (attribute === 'presence') {
+        const [characterResult] = await pool.execute(
+          "SELECT * FROM characters WHERE id = ?",
+          [characterId]
+        );
+
+        const classValues = {
+          Ocultista: 4,
+          Especialista: 3,
+          Combatente: 2,
+        };
+
+        const defaultVal = classValues[characterResult[0].class] || 1;
+
+        let levels = characterResult[0].nex / 5 - 1;
+        if (levels < 0) {levels = 0;}
+
+        const effort = defaultVal + Number(attributeValue) + ((defaultVal + Number(attributeValue)) * levels);
+
+        await pool.execute(
+          "UPDATE characters SET max_effort = ?, current_effort = ? WHERE id = ?",
+          [effort, effort, characterId]
+        );
       }
 
       res.status(200).json({ message: "Atributo atualizado com sucesso" });
