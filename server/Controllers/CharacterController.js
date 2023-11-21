@@ -210,7 +210,7 @@ class CharacterController {
 
       await pool.execute(
         "INSERT INTO inventory_infos (prestige_points, patent, item_limit_1, item_limit_2, item_limit_3, item_limit_4, credit_limit, max_load, max_spc_load, character_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-        [0, "", 2, null, null, null, "", 0, 0, newCharacterId]
+        [0, "Recruta", 2, null, null, null, "Baixo", 0, 5, newCharacterId]
       );
 
       await pool.execute(
