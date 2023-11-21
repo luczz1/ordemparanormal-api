@@ -116,7 +116,7 @@ class CharacterController {
       current_effort = max_effort;
       current_sanity = max_sanity;
 
-      pe_round = nex / 5;
+      pe_round = Math.ceil(nex / 5);
       if (pe_round <= 0) pe_round = 1;
 
       const [characterResult] = await pool.execute(
@@ -449,7 +449,7 @@ class CharacterController {
         updatedCharacter.max_effort = (1 + attrResult[0].presence);
         updatedCharacter.max_sanity = 8;
       } else {
-        const levels = (updatedCharacter.nex / 5) - 1;
+        const levels = Math.ceil((updatedCharacter.nex / 5) - 1);
 
         switch (updatedCharacter.charClass) {
           case "Ocultista":
@@ -470,7 +470,7 @@ class CharacterController {
         }
       }
 
-      updatedCharacter.pe_round = updatedCharacter.nex / 5;
+      updatedCharacter.pe_round = Math.ceil(updatedCharacter.nex / 5);
 
       updatedCharacter.current_life = updatedCharacter.max_life;
       updatedCharacter.current_effort = updatedCharacter.max_effort;
