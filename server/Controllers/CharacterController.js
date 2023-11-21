@@ -239,6 +239,15 @@ class CharacterController {
         [...proficiencyValues, newCharacterId]
       );
 
+      let abilitiesNex = abilitiesNexMap.find((obj) => obj[charClass]);
+      abilitiesNex = abilitiesNex[charClass];
+
+      await pool.execute(
+        "INSERT INTO abilities (name, description, character_id, page, type) VALUES (?, ?, ?, ?, ?)",
+        [abilitiesNex[0], abilitiesNex[1], newCharacterId, null, 'class']
+      );
+
+
       origin = origin.replace(/\s/g, "");
       origin = origin.replaceAll(".", " ");
 
@@ -293,14 +302,6 @@ class CharacterController {
         dt,
         newCharacterId,
       ]);
-
-      let abilitiesNex = abilitiesNexMap.find((obj) => obj[charClass]);
-      abilitiesNex = abilitiesNex[charClass];
-
-      await pool.execute(
-        "INSERT INTO abilities (name, description, character_id, page, type) VALUES (?, ?, ?, ?, ?)",
-        [abilitiesNex[0], abilitiesNex[1], newCharacterId, null, 'class']
-      );
 
       res.json({
         character: {

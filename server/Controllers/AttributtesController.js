@@ -94,6 +94,8 @@ class AttributesController {
           [life, life, characterId]
         );
       } else if (attribute === 'presence') {
+        const dt = 10 + Number(attributeValue);
+
         const [characterResult] = await pool.execute(
           "SELECT * FROM characters WHERE id = ?",
           [characterId]
@@ -113,8 +115,8 @@ class AttributesController {
         const effort = defaultVal + Number(attributeValue) + ((defaultVal + Number(attributeValue)) * levels);
 
         await pool.execute(
-          "UPDATE characters SET max_effort = ?, current_effort = ? WHERE id = ?",
-          [effort, effort, characterId]
+          "UPDATE characters SET max_effort = ?, current_effort = ?, dt = ? WHERE id = ?",
+          [effort, effort, dt, characterId]
         );
       }
 
