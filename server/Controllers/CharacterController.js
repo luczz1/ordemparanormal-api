@@ -208,9 +208,11 @@ class CharacterController {
         "INSERT INTO skills (character_id, name, value, favorite, training) VALUES ?";
       await pool.query(query, [skillsData]);
 
+      const patent = charClass === "Mundano" ? charClass : "Recruta";
+
       await pool.execute(
         "INSERT INTO inventory_infos (prestige_points, patent, item_limit_1, item_limit_2, item_limit_3, item_limit_4, credit_limit, max_load, max_spc_load, character_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-        [0, "Recruta", 2, null, null, null, "Baixo", 0, 5, newCharacterId]
+        [0, patent, 2, null, null, null, "Baixo", 0, 5, newCharacterId]
       );
 
       await pool.execute(
@@ -244,9 +246,8 @@ class CharacterController {
 
       await pool.execute(
         "INSERT INTO abilities (name, description, character_id, page, type) VALUES (?, ?, ?, ?, ?)",
-        [abilitiesNex[0], abilitiesNex[1], newCharacterId, null, 'class']
+        [abilitiesNex[0], abilitiesNex[1], newCharacterId, null, "class"]
       );
-
 
       origin = origin.replace(/\s/g, "");
       origin = origin.replaceAll(".", " ");
@@ -271,7 +272,7 @@ class CharacterController {
             abilitiesData.desc,
             abilitiesData.id,
             abilitiesData.page,
-            'default'
+            "default",
           ]
         );
       }
@@ -431,40 +432,56 @@ class CharacterController {
 
       await pool.execute(
         "DELETE FROM abilities WHERE character_id = ? AND type = ?",
-        [characterId, 'class']
+        [characterId, "class"]
       );
 
-      let abilitiesNex = abilitiesNexMap.find((obj) => obj[updatedCharacter.charClass]);
+      let abilitiesNex = abilitiesNexMap.find(
+        (obj) => obj[updatedCharacter.charClass]
+      );
       abilitiesNex = abilitiesNex[updatedCharacter.charClass];
 
       await pool.execute(
         "INSERT INTO abilities (name, description, character_id, page, type) VALUES (?, ?, ?, ?, ?)",
-        [abilitiesNex[0], abilitiesNex[1], characterId, null, 'class']
+        [abilitiesNex[0], abilitiesNex[1], characterId, null, "class"]
       );
 
       if (updatedCharacter.charClass === "Mundano") {
         updatedCharacter.nex = 0;
 
-        updatedCharacter.max_life = (8 + attrResult[0].stamina);
-        updatedCharacter.max_effort = (1 + attrResult[0].presence);
+        updatedCharacter.max_life = 8 + attrResult[0].stamina;
+        updatedCharacter.max_effort = 1 + attrResult[0].presence;
         updatedCharacter.max_sanity = 8;
       } else {
-        const levels = Math.ceil((updatedCharacter.nex / 5) - 1);
+        const levels = Math.ceil(updatedCharacter.nex / 5 - 1);
 
         switch (updatedCharacter.charClass) {
           case "Ocultista":
-            updatedCharacter.max_life = (12 + attrResult[0].stamina) + ((2 + attrResult[0].stamina) * levels);
-            updatedCharacter.max_effort = (4 + attrResult[0].presence) + ((4 + attrResult[0].presence) * levels);
+            updatedCharacter.max_life =
+              12 + attrResult[0].stamina + (2 + attrResult[0].stamina) * levels;
+            updatedCharacter.max_effort =
+              4 +
+              attrResult[0].presence +
+              (4 + attrResult[0].presence) * levels;
             updatedCharacter.max_sanity = 20 + 5 * levels;
             break;
           case "Especialista":
-            updatedCharacter.max_life = (16 + attrResult[0].stamina) + ((3 + attrResult[0].stamina) * levels);
-            updatedCharacter.max_effort = (3 + attrResult[0].presence) + ((3 + attrResult[0].presence) * levels);
+            updatedCharacter.max_life =
+              16 + attrResult[0].stamina + (3 + attrResult[0].stamina) * levels;
+            updatedCharacter.max_effort =
+              3 +
+              attrResult[0].presence +
+              (3 + attrResult[0].presence) * levels;
             updatedCharacter.max_sanity = 16 + 4 * levels;
             break;
           case "Combatente":
-            updatedCharacter.max_life = (20 + attrResult[0].stamina) + ((4 + + attrResult[0].stamina) * levels);
-            updatedCharacter.max_effort = (2 + attrResult[0].presence) + ((2 + attrResult[0].presence) * levels);
+            updatedCharacter.max_life =
+              20 +
+              attrResult[0].stamina +
+              (4 + +attrResult[0].stamina) * levels;
+            updatedCharacter.max_effort =
+              2 +
+              attrResult[0].presence +
+              (2 + attrResult[0].presence) * levels;
             updatedCharacter.max_sanity = 12 + 3 * levels;
             break;
         }
