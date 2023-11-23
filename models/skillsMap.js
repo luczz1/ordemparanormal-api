@@ -15,7 +15,7 @@ const skillsMap = [
     Atleta: ["Acrobacia", "Atletismo"],
   },
   {
-    Chef: ["Fortitude", "Profissão (cozinheiro)"],
+    Chef: ["Fortitude", "Profissão"],
   },
   {
     CientistaForense: ["Ciências", "Investigação"],
