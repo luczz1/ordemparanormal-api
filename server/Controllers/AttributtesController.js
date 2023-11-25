@@ -94,12 +94,12 @@ class AttributesController {
           [life, life, characterId]
         );
       } else if (attribute === 'presence') {
-        const dt = 10 + Number(attributeValue);
-
         const [characterResult] = await pool.execute(
           "SELECT * FROM characters WHERE id = ?",
           [characterId]
         );
+
+        const dt = 10 + Number(attributeValue) + (characterResult[0].nex / 5);
 
         const classValues = {
           Ocultista: 4,

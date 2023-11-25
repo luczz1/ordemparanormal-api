@@ -297,7 +297,7 @@ class CharacterController {
         });
       }
 
-      const dt = 10 + presence;
+      const dt = 10 + presence + (nex / 5);
 
       await pool.execute("UPDATE characters SET dt = ? WHERE id = ?", [
         dt,
@@ -493,8 +493,10 @@ class CharacterController {
       updatedCharacter.current_effort = updatedCharacter.max_effort;
       updatedCharacter.current_sanity = updatedCharacter.max_sanity;
 
+      const dt = 10 + attrResult[0].presence + (updatedCharacter.nex / 5);
+
       await pool.execute(
-        "UPDATE characters SET name = ?, current_life = ?, max_life = ?, current_sanity = ?, max_sanity = ?, current_effort = ?, max_effort = ?, class = ?, image_url = ?, nex = ?, weight = ?, age = ?, occupation = ?, `path` = ?, player = ?, displacement = ?, origin = ?, pe_round = ?, user_id = ? WHERE id = ?",
+        "UPDATE characters SET name = ?, current_life = ?, max_life = ?, current_sanity = ?, max_sanity = ?, current_effort = ?, max_effort = ?, class = ?, image_url = ?, nex = ?, weight = ?, age = ?, occupation = ?, `path` = ?, player = ?, displacement = ?, origin = ?, pe_round = ?, dt = ?, user_id = ? WHERE id = ?",
         [
           updatedCharacter.name,
           updatedCharacter.current_life,
@@ -514,6 +516,7 @@ class CharacterController {
           updatedCharacter.displacement,
           updatedCharacter.origin,
           updatedCharacter.pe_round,
+          dt,
           userid,
           characterId,
         ]
