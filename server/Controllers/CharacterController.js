@@ -249,6 +249,13 @@ class CharacterController {
         [abilitiesNex[0], abilitiesNex[1], newCharacterId, null, "class"]
       );
 
+      if (charClass === 'Especialista') {
+        await pool.execute(
+          "INSERT INTO abilities (name, description, character_id, page, type) VALUES (?, ?, ?, ?, ?)",
+          [abilitiesNex[2], abilitiesNex[3], newCharacterId, null, "class"]
+        );
+      }
+
       origin = origin.replace(/\s/g, "");
       origin = origin.replaceAll(".", " ");
 
@@ -444,6 +451,13 @@ class CharacterController {
         "INSERT INTO abilities (name, description, character_id, page, type) VALUES (?, ?, ?, ?, ?)",
         [abilitiesNex[0], abilitiesNex[1], characterId, null, "class"]
       );
+
+      if (updatedCharacter.charClass === 'Especialista') {
+        await pool.execute(
+          "INSERT INTO abilities (name, description, character_id, page, type) VALUES (?, ?, ?, ?, ?)",
+          [abilitiesNex[2], abilitiesNex[3], characterId, null, "class"]
+        );
+      }
 
       if (updatedCharacter.charClass === "Mundano") {
         updatedCharacter.nex = 0;
