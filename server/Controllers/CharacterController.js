@@ -167,17 +167,20 @@ class CharacterController {
       );
 
       const skillsName = [
+        "acrobacia",
+        "adestramento",
         "artes",
         "atletismo",
         "atualidades",
         "ciências",
+        "crime",
         "diplomacia",
         "enganação",
         "fortitude",
         "furtividade",
         "iniciativa",
-        "intuição",
         "intimidação",
+        "intuição",
         "investigação",
         "luta",
         "medicina",
@@ -185,7 +188,6 @@ class CharacterController {
         "percepção",
         "pilotagem",
         "pontaria",
-        "prestidigitação",
         "profissão",
         "reflexos",
         "religião",
@@ -193,7 +195,6 @@ class CharacterController {
         "tática",
         "tecnologia",
         "vontade",
-        "crime",
       ];
 
       const skillsData = skillsName.map((skill) => [
