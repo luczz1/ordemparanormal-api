@@ -167,48 +167,32 @@ class CharacterController {
       );
 
       const skillsName = [
-        "acrobacia",
-        "adestramento",
-        "artes",
-        "atletismo",
-        "atualidades",
-        "ciências",
-        "crime",
-        "diplomacia",
-        "enganação",
-        "fortitude",
-        "furtividade",
-        "iniciativa",
-        "intimidação",
-        "intuição",
-        "investigação",
-        "luta",
-        "medicina",
-        "ocultismo",
-        "percepção",
-        "pilotagem",
-        "pontaria",
-        "profissão",
-        "reflexos",
-        "religião",
-        "sobrevivência",
-        "tática",
-        "tecnologia",
-        "vontade",
+        "acrobacia", "adestramento", "artes", "atletismo", "atualidades", 
+        "ciências", "crime", "diplomacia", "enganação", "fortitude", 
+        "furtividade", "iniciativa", "intimidação", "intuição", "investigação", 
+        "luta", "medicina", "ocultismo", "percepção", "pilotagem", "pontaria", 
+        "profissão", "reflexos", "religião", "sobrevivência", "tática", 
+        "tecnologia", "vontade"
       ];
-
-      const skillsData = skillsName.map((skill) => [
-        newCharacterId,
-        skill,
-        0,
-        0,
-        0,
+      
+      const skillAttributeMap = {
+        acrobacia: "AGI", adestramento: "PRE", artes: "PRE", atletismo: "FOR", 
+        atualidades: "INT", ciências: "INT", crime: "AGI", diplomacia: "PRE", 
+        enganação: "PRE", fortitude: "VIG", furtividade: "AGI", iniciativa: "AGI", 
+        intimidação: "PRE", intuição: "PRE", investigação: "INT", luta: "FOR", 
+        medicina: "INT", ocultismo: "INT", percepção: "PRE", pilotagem: "AGI", 
+        pontaria: "AGI", profissão: "INT", reflexos: "AGI", religião: "PRE", 
+        sobrevivência: "INT", tática: "INT", tecnologia: "INT", vontade: "PRE"
+      };
+      
+      const skillsData = skillsName.map(skill => [
+        newCharacterId, skill, 0, 0, 0, skillAttributeMap[skill]
       ]);
-
+      
       const query =
-        "INSERT INTO skills (character_id, name, value, favorite, training) VALUES ?";
+        "INSERT INTO skills (character_id, name, value, favorite, training, attribute) VALUES ?";
       await pool.query(query, [skillsData]);
-
+      
       const patent = charClass === "Mundano" ? charClass : "Recruta";
 
       await pool.execute(
@@ -250,7 +234,7 @@ class CharacterController {
         [abilitiesNex[0], abilitiesNex[1], newCharacterId, null, "class"]
       );
 
-      if (charClass === 'Especialista') {
+      if (charClass === "Especialista") {
         await pool.execute(
           "INSERT INTO abilities (name, description, character_id, page, type) VALUES (?, ?, ?, ?, ?)",
           [abilitiesNex[2], abilitiesNex[3], newCharacterId, null, "class"]
@@ -305,7 +289,7 @@ class CharacterController {
         });
       }
 
-      const dt = 10 + presence + (nex / 5);
+      const dt = 10 + presence + nex / 5;
 
       await pool.execute("UPDATE characters SET dt = ? WHERE id = ?", [
         dt,
@@ -453,7 +437,7 @@ class CharacterController {
         [abilitiesNex[0], abilitiesNex[1], characterId, null, "class"]
       );
 
-      if (updatedCharacter.charClass === 'Especialista') {
+      if (updatedCharacter.charClass === "Especialista") {
         await pool.execute(
           "INSERT INTO abilities (name, description, character_id, page, type) VALUES (?, ?, ?, ?, ?)",
           [abilitiesNex[2], abilitiesNex[3], characterId, null, "class"]
@@ -508,7 +492,7 @@ class CharacterController {
       updatedCharacter.current_effort = updatedCharacter.max_effort;
       updatedCharacter.current_sanity = updatedCharacter.max_sanity;
 
-      const dt = 10 + attrResult[0].presence + (updatedCharacter.nex / 5);
+      const dt = 10 + attrResult[0].presence + updatedCharacter.nex / 5;
 
       await pool.execute(
         "UPDATE characters SET name = ?, current_life = ?, max_life = ?, current_sanity = ?, max_sanity = ?, current_effort = ?, max_effort = ?, class = ?, image_url = ?, nex = ?, weight = ?, age = ?, occupation = ?, `path` = ?, player = ?, displacement = ?, origin = ?, pe_round = ?, dt = ?, user_id = ? WHERE id = ?",

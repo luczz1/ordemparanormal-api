@@ -109,6 +109,11 @@ class InventoryController {
       const newInventoryItem = req.body;
       const characterId = req.params.characterid;
 
+      if (!newInventoryItem.item_name || !newInventoryItem.category || !newInventoryItem.slots) {
+        res.status(500).json("Todos os campos são obrigatórios.");
+        return;
+      }
+
       const sqlInsert =
         "INSERT INTO inventory_items (item_name, category, slots, character_id) VALUES (?, ?, ?, ?)";
       const sqlUpdate = `
