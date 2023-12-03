@@ -625,7 +625,9 @@ async function saveBase64ImageToDisk(base64String, characterId) {
 
     fs.writeFileSync(newFilePath, bitmap);
 
-    return `http://localhost:3000/media/${filename}.jpg`;
+    const PORT = process.env.PORT || 3000;
+
+    return `http://luczzzz.duckdns.org:${PORT}/media/${filename}.jpg`;
   } catch (error) {
     console.error("Erro ao salvar imagem no disco:", error);
     return null;
