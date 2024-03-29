@@ -167,32 +167,32 @@ class CharacterController {
       );
 
       const skillsName = [
-        "acrobacia", "adestramento", "artes", "atletismo", "atualidades", 
-        "ciências", "crime", "diplomacia", "enganação", "fortitude", 
-        "furtividade", "iniciativa", "intimidação", "intuição", "investigação", 
-        "luta", "medicina", "ocultismo", "percepção", "pilotagem", "pontaria", 
-        "profissão", "reflexos", "religião", "sobrevivência", "tática", 
+        "acrobacia", "adestramento", "artes", "atletismo", "atualidades",
+        "ciências", "crime", "diplomacia", "enganação", "fortitude",
+        "furtividade", "iniciativa", "intimidação", "intuição", "investigação",
+        "luta", "medicina", "ocultismo", "percepção", "pilotagem", "pontaria",
+        "profissão", "reflexos", "religião", "sobrevivência", "tática",
         "tecnologia", "vontade"
       ];
-      
+
       const skillAttributeMap = {
-        acrobacia: "AGI", adestramento: "PRE", artes: "PRE", atletismo: "FOR", 
-        atualidades: "INT", ciências: "INT", crime: "AGI", diplomacia: "PRE", 
-        enganação: "PRE", fortitude: "VIG", furtividade: "AGI", iniciativa: "AGI", 
-        intimidação: "PRE", intuição: "PRE", investigação: "INT", luta: "FOR", 
-        medicina: "INT", ocultismo: "INT", percepção: "PRE", pilotagem: "AGI", 
-        pontaria: "AGI", profissão: "INT", reflexos: "AGI", religião: "PRE", 
+        acrobacia: "AGI", adestramento: "PRE", artes: "PRE", atletismo: "FOR",
+        atualidades: "INT", ciências: "INT", crime: "AGI", diplomacia: "PRE",
+        enganação: "PRE", fortitude: "VIG", furtividade: "AGI", iniciativa: "AGI",
+        intimidação: "PRE", intuição: "PRE", investigação: "INT", luta: "FOR",
+        medicina: "INT", ocultismo: "INT", percepção: "PRE", pilotagem: "AGI",
+        pontaria: "AGI", profissão: "INT", reflexos: "AGI", religião: "PRE",
         sobrevivência: "INT", tática: "INT", tecnologia: "INT", vontade: "PRE"
       };
-      
+
       const skillsData = skillsName.map(skill => [
         newCharacterId, skill, 0, 0, 0, skillAttributeMap[skill]
       ]);
-      
+
       const query =
         "INSERT INTO skills (character_id, name, value, favorite, training, attribute) VALUES ?";
       await pool.query(query, [skillsData]);
-      
+
       const patent = charClass === "Mundano" ? charClass : "Recruta";
 
       await pool.execute(
@@ -422,26 +422,33 @@ class CharacterController {
         [characterId]
       );
 
-      await pool.execute(
-        "DELETE FROM abilities WHERE character_id = ? AND type = ?",
-        [characterId, "class"]
+      const [actualData] = await pool.execute(
+        "SELECT * FROM characters WHERE id = ?",
+        [characterId]
       );
 
-      let abilitiesNex = abilitiesNexMap.find(
-        (obj) => obj[updatedCharacter.charClass]
-      );
-      abilitiesNex = abilitiesNex[updatedCharacter.charClass];
+      if (actualData[0].class !== updatedCharacter.charClass) {
+        await pool.execute(
+          "DELETE FROM abilities WHERE character_id = ? AND type = ?",
+          [characterId, "class"]
+        );
 
-      await pool.execute(
-        "INSERT INTO abilities (name, description, character_id, page, type) VALUES (?, ?, ?, ?, ?)",
-        [abilitiesNex[0], abilitiesNex[1], characterId, null, "class"]
-      );
+        let abilitiesNex = abilitiesNexMap.find(
+          (obj) => obj[updatedCharacter.charClass]
+        );
+        abilitiesNex = abilitiesNex[updatedCharacter.charClass];
 
-      if (updatedCharacter.charClass === "Especialista") {
         await pool.execute(
           "INSERT INTO abilities (name, description, character_id, page, type) VALUES (?, ?, ?, ?, ?)",
-          [abilitiesNex[2], abilitiesNex[3], characterId, null, "class"]
+          [abilitiesNex[0], abilitiesNex[1], characterId, null, "class"]
         );
+
+        if (updatedCharacter.charClass === "Especialista") {
+          await pool.execute(
+            "INSERT INTO abilities (name, description, character_id, page, type) VALUES (?, ?, ?, ?, ?)",
+            [abilitiesNex[2], abilitiesNex[3], characterId, null, "class"]
+          );
+        }
       }
 
       if (updatedCharacter.charClass === "Mundano") {
@@ -627,7 +634,7 @@ async function saveBase64ImageToDisk(base64String, characterId) {
 
     const PORT = process.env.PORT || 3000;
 
-    return `http://luczzzz.duckdns.org:${PORT}/media/${filename}.jpg`;
+    return `http:/localhost:${PORT}/media/${filename}.jpg`;
   } catch (error) {
     console.error("Erro ao salvar imagem no disco:", error);
     return null;
