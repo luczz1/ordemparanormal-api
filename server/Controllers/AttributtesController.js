@@ -53,15 +53,27 @@ class AttributesController {
       const attribute = req.params.attribute;
       const attributeValue = req.params.value;
 
+      const [oldDef] = await pool.execute(
+        "SELECT * FROM character_defense WHERE character_id = ?",
+        [characterId]
+      );
+
+      const [oldAttr] = await pool.execute(
+        "SELECT * FROM attributes WHERE id = ?",
+        [characterId]
+      );
+
       await pool.execute(
         `UPDATE attributes SET ${attribute} = ? WHERE id = ?`,
         [attributeValue, characterId]
       );
 
       if (attribute === "agility") {
+        const defenseTot = oldDef[0].defense_total - oldAttr[0].agility + Number(attributeValue);
+
         await pool.execute(
           "UPDATE character_defense SET defense_total = ? WHERE character_id = ?",
-          [10 + Number(attributeValue), characterId]
+          [defenseTot, characterId]
         );
       } else if (attribute === "stamina") {
         const [characterResult] = await pool.execute(
