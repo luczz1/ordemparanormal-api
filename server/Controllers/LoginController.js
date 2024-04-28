@@ -4,6 +4,8 @@ import dotenv from "dotenv";
 import bcrypt from "bcrypt";
 import { tokenConfig } from "../../config/ValidateToken.js";
 
+import moment from 'moment';
+
 dotenv.config();
 
 class LoginController {
@@ -26,6 +28,12 @@ class LoginController {
         const passwordMatch = await bcrypt.compare(password, user.password);
 
         if (passwordMatch) {
+          const date = moment().format('YYYY-MM-DD HH:mm:ss');
+
+          await pool.execute("UPDATE users SET lastlogin = ? WHERE id = ?", [
+            date, user.id
+          ]);
+
           const token = generateAccessToken({ userid: user.id });
           response.status(200).json(token);
         } else {
@@ -49,9 +57,11 @@ class LoginController {
 
     try {
       const hashedPassword = await bcrypt.hash(password, 10);
+      const date = moment().format('YYYY-MM-DD HH:mm:ss');
+
       const [res] = await pool.query(
-        "INSERT INTO users (name, email, password) VALUES (?, ?, ?)",
-        [name, email, hashedPassword]
+        "INSERT INTO users (name, email, password, lastlogin, created_at) VALUES (?, ?, ?, ?, ?)",
+        [name, email, hashedPassword, date, date]
       );
 
       const token = generateAccessToken({ userid: res.insertId });

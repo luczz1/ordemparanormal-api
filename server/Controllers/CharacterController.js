@@ -8,6 +8,8 @@ import fs from "fs";
 import path from "path";
 import mediaPath from "../../server.js";
 
+import moment from 'moment';
+
 class CharacterController {
   async getCharacters(req, res) {
     try {
@@ -22,11 +24,15 @@ class CharacterController {
         return;
       }
 
-      const characters = characterResults.map((character) => {
+      let characters = characterResults.map((character) => {
         character.weight = character.weight.toFixed(2);
         return character;
       });
 
+      characters = characters.sort((a, b) => {
+        return new Date(a.lastacess) > new Date(b.lastacess) ? -1 : 1;
+    });
+    
       res.json({ characters });
     } catch (error) {
       console.error("Erro ao obter personagens:", error);
@@ -42,6 +48,12 @@ class CharacterController {
         "SELECT * FROM characters WHERE id = ?",
         [characterId]
       );
+
+      const date = moment().format('YYYY-MM-DD HH:mm:ss');
+
+      await pool.execute("UPDATE characters SET lastacess = ? WHERE id = ?", [
+        date, characterId
+      ]);
 
       if (characterResult.length === 0) {
         res.status(404).json("Personagem não encontrado");
@@ -634,7 +646,7 @@ async function saveBase64ImageToDisk(base64String, characterId) {
 
     const PORT = process.env.PORT || 3000;
 
-    return `http:/localhost:${PORT}/media/${filename}.jpg`;
+    return `http://localhost:${PORT}/media/${filename}.jpg`;
   } catch (error) {
     console.error("Erro ao salvar imagem no disco:", error);
     return null;
